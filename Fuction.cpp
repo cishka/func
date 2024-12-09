@@ -94,12 +94,42 @@ void print_result(double benchmark, double calculated, double difference, int am
 	}
 
 
-void print_result_experiment(int experiment_number, double benchmark, double calculated, double difference) {
-	printf("Expirement %d: Benchmark = %.10f, Calculated = %.10f, Difference = %.10f\n", experiment_number, benchmark, calculated, difference);
-}
-
-
 double (*function[4])(double, int, int) = { sine_taylor, cos_taylor, exp_taylor, csc_taylor };
+
+
+void print_result_experiment(double (*func)(double, int, int), double x, int amount_of_number, int accuracy) {
+	double taylor_value = 0.0;
+	double term = 0.0;
+
+	printf("Taylor series iterations:\n");
+	for (int i = 0; i < amount_of_number; ++i) {
+		if (func == sine_taylor) {
+			term = (i % 2 == 0 ? 1 : -1) * pow(x, 2 * i + 1) / Factoiral(2 * i + 2);
+		}
+		else if (func == cos_taylor) {
+			term = (i % 2 == 0 ? 1 : -1) * pow(x, 2 * i) / Factoiral(2 * i + 1);
+		}
+		else if (func == exp_taylor) {
+			term = pow(x, i) / Factoiral(i + 1);
+		}
+		else if (func == csc_taylor) {
+			term = 1 / ((i % 2 == 0 ? 1 : -1) * pow(x, 2 * i + 1) / Factoiral(2 * i + 2));
+		}
+
+		taylor_value += term;
+		printf("Iteration %d: %.10f\n", i + 1, rounding(taylor_value, accuracy));
+
+		printf("\n");
+		double benchmark_result = 0.0;
+		if (func == sine_taylor) benchmark_result = sin(x);
+		else if (func == cos_taylor) benchmark_result = cos(x);
+		else if (func == exp_taylor) benchmark_result = exp(x);
+		else if (func == csc_taylor) benchmark_result = cosh(x);
+		printf("\nFinal result: %.10f\n", rounding(taylor_value, accuracy));
+		printf("Benchmark result: %.10f\n", rounding(benchmark_result, accuracy));
+		printf("Difference: %.10f\n\n", fabs(taylor_value - benchmark_result));
+	}
+}
 
 int main() {
 	printf("Select mode:\n");
@@ -173,7 +203,7 @@ int main() {
 			}
 
 			difference = fabs(calculated - bencmark);
-			print_result_experiment(i, bencmark, calculated, difference);
+			print_result_experiment(function[mode-1],choosen_number, amount_number, accuracy);
 		}
 	}
 	return 0;
